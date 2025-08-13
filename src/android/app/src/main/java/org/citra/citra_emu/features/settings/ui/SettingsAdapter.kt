@@ -290,10 +290,29 @@ class SettingsAdapter(
                 timePicker.show(fragmentManager, "TimePicker")
             }
         }
-        timePicker.addOnPositiveButtonClickListener {
+timePicker.addOnPositiveButtonClickListener {
+    // Prefill seconds from the currently stored timestamp
+    val defaultSeconds = calendar.get(Calendar.SECOND).coerceIn(0, 59)
+
+    val inflater = LayoutInflater.from(context)
+    val inputBinding = DialogSoftwareKeyboardBinding.inflate(inflater)
+    inputBinding.editText.hint = context.getString(R.string.select_rtc_seconds) // optional hint
+    inputBinding.editTextInput.inputType = InputType.TYPE_CLASS_NUMBER
+    inputBinding.editTextInput.setText(defaultSeconds.toString())
+    inputBinding.editTextInput.setSelection(inputBinding.editTextInput.length())
+
+    MaterialAlertDialogBuilder(context)
+        .setTitle(R.string.select_rtc_seconds)
+        .setView(inputBinding.root)
+        .setNegativeButton(android.R.string.cancel, null) // cancel: don't save anything
+        .setPositiveButton(android.R.string.ok) { _, _ ->
+            val seconds = inputBinding.editTextInput.text?.toString()?.toIntOrNull()?.coerceIn(0, 59) ?: 0
+
             var epochTime: Long = datePicker.selection!! / 1000
             epochTime += timePicker.hour.toLong() * 60 * 60
             epochTime += timePicker.minute.toLong() * 60
+            epochTime += seconds.toLong()
+
             val rtcString = epochTime.toString()
             if (item.value != rtcString) {
                 fragmentView.onSettingChanged()
@@ -304,11 +323,8 @@ class SettingsAdapter(
             fragmentView.loadSettingsList()
             clickedItem = null
         }
-        datePicker.show(
-            (fragmentView.activityView as AppCompatActivity).supportFragmentManager,
-            "DatePicker"
-        )
-    }
+        .show()
+}
 
     fun onSliderClick(item: SliderSetting, position: Int) {
         clickedItem = item
