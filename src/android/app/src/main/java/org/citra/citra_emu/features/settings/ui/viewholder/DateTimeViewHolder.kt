@@ -44,7 +44,8 @@ class DateTimeViewHolder(val binding: ListItemSettingBinding, adapter: SettingsA
         }
         val instant = Instant.ofEpochMilli(epochTime * 1000)
         val zonedTime = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"))
-        val dateFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
         binding.textSettingValue.text = dateFormatter.format(zonedTime)
 
         if (setting.isActive) {
